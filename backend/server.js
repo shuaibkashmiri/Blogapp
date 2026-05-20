@@ -3,11 +3,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
 import { connectDB } from "./config/db.js";
-import {
-  getUserDetail,
-  loginUser,
-  registerUser,
-} from "./controllers/userController.js";
 import { isAuthenticated } from "./middlewares/auth.js";
 import authRoutes from "./routes/authRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
