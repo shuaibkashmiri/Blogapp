@@ -1,16 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { toast } from "react-toastify";
-import { useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+
 const Authorized = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
-  if (!token) {
-    return navigate("/login");
-  }
+  const { token, isAuthenticated } = useAuth();
 
   const checkAuth = async () => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
     try {
       const resp = await axios.get(
         `${import.meta.env.VITE_API_URL}/user/cl-auth`,
@@ -22,19 +24,23 @@ const Authorized = () => {
       );
 
       if (resp.data.success !== true) {
-        return navigate("/login");
-        toast.error("Login First");
+        navigate("/login");
       }
-      return true;
     } catch (error) {
-      return navigate("/login");
       console.log(error);
+      navigate("/login");
     }
   };
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
     checkAuth();
-  }, []);
+  }, [isAuthenticated, token]);
+
+  return null;
 };
 
 export default Authorized;

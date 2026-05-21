@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ const Login = () => {
     password: "",
   });
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,9 +27,11 @@ const Login = () => {
 
       if (res.data.message == "User Logged In Successfully") {
         toast.success(res.data.message);
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("userId", res.data.userId);
-        localStorage.setItem("email", formData.email);
+        login({
+          token: res.data.token,
+          userId: res.data.userId,
+          email: formData.email,
+        });
         navigate("/user/dashboard");
       } else {
         toast.error(res.data.message);

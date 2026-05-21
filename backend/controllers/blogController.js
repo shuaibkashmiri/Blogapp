@@ -82,17 +82,75 @@ export const toggleLike = async (req, res) => {
     const { blogId } = req.params;
     const userId = req.user;
     const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog Not Found" });
+    }
     if (blog.likes.includes(userId)) {
-      blog.likes = blog.likes.filter((id) => {
-        id.toString() !== userId.toString();
-      });
+      blog.likes = blog.likes.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
     } else {
       blog.likes.push(userId);
     }
     await blog.save();
-    return res.json({ message: "blog likes updated" });
+    return res.json({ message: "Blog likes updated" });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({ message: "Could not update likes" });
+  }
+};
+
+export const updateBlog = async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const userId = req.user;
+    const { title, content } = req.body;
+
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog Not Found" });
+    }
+    if (blog.author.toString() !== userId.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to edit this blog" });
+    }
+
+    if (title) blog.title = title;
+    if (content) blog.content = content;
+    if (req.file && req.file.path) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      blog.image = result.secure_url;
+    }
+
+    await blog.save();
+    return res.json({ message: "Blog updated successfully", blog });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Could not update blog" });
+  }
+};
+
+export const deleteBlog = async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const userId = req.user;
+
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog Not Found" });
+    }
+    if (blog.author.toString() !== userId.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this blog" });
+    }
+
+    await Blog.findByIdAndDelete(blogId);
+    return res.json({ message: "Blog deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Could not delete blog" });
   }
 };
 

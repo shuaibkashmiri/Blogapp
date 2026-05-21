@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "./FullBlog.css";
 import { toast } from "react-toastify";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 
 const FullBlog = () => {
   const { _id } = useParams();
+  const navigate = useNavigate();
+  const { token, userId: currentUserId } = useAuth();
   const [blog, setBlog] = useState({});
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [text, setText] = useState("");
   const [comments, setComments] = useState([]);
-  const token = localStorage.getItem("token");
 
   const getBlog = async () => {
     try {
@@ -27,8 +29,7 @@ const FullBlog = () => {
       setBlog(resp.data.blog);
       setLikeCount(resp.data.blog.likes.length);
       setComments(resp.data.blog.comments);
-      const userId = localStorage.getItem("userId");
-      if (resp.data.blog.likes.includes(userId)) {
+      if (resp.data.blog.likes.includes(currentUserId)) {
         setLiked(true);
       } else {
         setLiked(false);
@@ -55,6 +56,24 @@ const FullBlog = () => {
       console.log(resp.data);
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const deleteBlog = async () => {
+    const confirmDelete = window.confirm("Do you want to delete this blog?");
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/blog/${_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Blog deleted successfully.");
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+      toast.error("Unable to delete blog.");
     }
   };
 
@@ -105,6 +124,15 @@ const FullBlog = () => {
           <FaRegHeart size={"30"} onClick={handleLike} cursor={"pointer"} />
         )}
         <span>{`  ${likeCount} Likes`}</span>
+        {blog.author?._id === currentUserId ? (
+          <button
+            className="btn btn-danger mt-3"
+            type="button"
+            onClick={deleteBlog}
+          >
+            Delete Blog
+          </button>
+        ) : null}
         <div className="container">
           <div className="card mt-4">
             <div className="card-header bg-white">Add a Comment</div>

@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import "./Navbar.css";
 
 const Navbar = () => {
-  const location = useLocation();
-  const [email, setEmail] = useState(localStorage.getItem("email"));
-  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+  const { email, token, logout } = useAuth();
 
-  useEffect(() => {
-    setEmail(localStorage.getItem("email"));
-  }, [location]);
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <>
@@ -44,12 +45,19 @@ const Navbar = () => {
                     {email ? `Logged in as ${email}` : "Logged in"}
                   </span>
                   <Link
-                    to={"/user/dashboard"}
-                    className="btn btn-outline-success"
+                    to="/user/dashboard"
+                    className="btn btn-outline-success me-2"
                     type="submit"
                   >
                     Dashboard
                   </Link>
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
                 </>
               ) : (
                 <Link

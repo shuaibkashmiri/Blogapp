@@ -1,8 +1,8 @@
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/sharedComponents/Navbar";
 import Register from "./components/user/Register";
-
 import Login from "./components/user/Login";
 import { ToastContainer } from "react-toastify";
 import Home from "./pages/Home";
@@ -12,7 +12,7 @@ import Footer from "./components/sharedComponents/Footer";
 import PageNotFound from "./pages/PageNotFound";
 const App = () => {
   return (
-    <>
+    <AuthProvider>
       <BrowserRouter>
         <Navbar />
         <ToastContainer />
@@ -26,7 +26,7 @@ const App = () => {
         </Routes>
         <Footer />
       </BrowserRouter>
-    </>
+    </AuthProvider>
   );
 };
 
